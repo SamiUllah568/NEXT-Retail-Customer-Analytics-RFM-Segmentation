@@ -6,7 +6,7 @@ I built this project to answer a simple question a retailer should be able to an
 
 Using two years of real transaction data, I cleaned it in SQL, scored every customer on Recency, Frequency and Monetary value, flagged churn risk, and turned the results into an interactive Power BI dashboard with a clear action plan for each customer segment.
 
-![Home page](images/home_page.png)
+![Home page](Dashboards%20Screenshots/Home%20Page.png)
 
 ---
 
@@ -151,11 +151,11 @@ Every page has slicers for month, quarter, year, country, segment and churn flag
 
 | Revenue overview | Customers overview |
 |---|---|
-| ![Revenue](images/revenue_overview.png) | ![Customers](images/customers_overview.png) |
+| ![Revenue](Dashboards%20Screenshots/Revenue%20Overview.png) | ![Customers](Dashboards%20Screenshots/Customers%20Overview.png) |
 
 | Segment analysis | Country analysis |
 |---|---|
-| ![Segments](images/segment_analysis.png) | ![Country](images/country_analysis.png) |
+| ![Segments](Dashboards%20Screenshots/Customer%20RFM%20Segment%20Analysis.png) | ![Country](Dashboards%20Screenshots/Country%20Analysis.png) |
 
 ---
 
@@ -191,8 +191,12 @@ I'd rather be upfront about these than have you find them later.
 │   └── NEXT_Retail_Gifting.pbix
 ├── docs/
 │   └── BRD_Customer_Analytics_RFM.pdf
-├── images/
-│   └── (dashboard screenshots)
+├── Dashboards Screenshots/
+│   ├── Home Page.png
+│   ├── Revenue Overview.png
+│   ├── Customers Overview.png
+│   ├── Customer RFM Segment Analysis.png
+│   └── Country Analysis.png
 └── README.md
 ```
 
