@@ -1,99 +1,30 @@
 # NEXT Retail: Customer Analytics & RFM Segmentation
 
-**SQL (PostgreSQL) + Power BI | 5,879 customers | 17.37M in revenue | 2 years of transactions**
+*Which customers are worth fighting for, and which ones have already slipped away?*
 
-I built this project to answer a simple question a retailer should be able to answer: *who are our best customers, and who are we about to lose?*
-
-Using two years of real transaction data, I cleaned it in SQL, scored every customer on Recency, Frequency and Monetary value, flagged churn risk, and turned the results into an interactive Power BI dashboard with a clear action plan for each customer segment.
+NEXT is a UK online shop selling gifts and home decor. Two years of its orders sit behind this project, around 5,900 customers in total. I cleaned the raw transactions in PostgreSQL, scored every customer on recency, frequency and spend (RFM), and built a three-page Power BI report that tells the marketing team who to reward, who to win back and who to welcome.
 
 ![Home page](Dashboards%20Screenshots/Home%20Page.png)
 
----
+**5,879 customers  |  17.37M revenue  |  50.84% haven't bought in the last 90 days**
 
-## The headline findings
-
-- **Champions are 21.5% of customers but bring in 67.7% of revenue** (11.77M of 17.37M). They are the business.
-- **Half the customer base (50.84%) has gone quiet**, meaning no purchase in the last 90 days.
-- **At Risk and Lost customers make up 40% of all customers** and 100% of them are churned. They still account for about 2.25M in lifetime revenue (12.9%).
-- **The UK is 82.8% of revenue** and 5,351 of 5,879 customers.
-- **EIRE has only 4 customers but 616K in revenue.** These are very high-value accounts, and a market worth understanding better.
-- Roughly **640 churned customers are sitting inside Loyal and Needs Attention**, so they are not flagged as At Risk or Lost, but they have still gone quiet. This is an easy group to miss.
+There is also a short visual write-up of the project: [NEXT_Retail_RFM_Portfolio.pdf](documentation/NEXT_Retail_RFM_Portfolio.pdf).
 
 ---
 
-## Business problem
+## What the data says
 
-NEXT is a UK-based online-only retailer of gifts and home décor. A large share of its customers are wholesale buyers. Leadership had no structured view of which customers drive revenue or which are disengaging, so retention and marketing spend was reactive and treated everyone the same.
+**A small group carries the business.** 1,265 Champions are about a fifth of the customers (21.5%) and bring in 11.77M of the 17.37M in revenue, which is 67.7%. If I had to protect one thing, it would be this group.
 
-The goal: identify the most valuable segments, quantify churn risk, and tell the marketing and CRM teams what to do with each group.
+**Half the customer base has gone quiet.** 50.84% haven't ordered in 90 days. At Risk and Lost together are 40% of all customers, and they still account for roughly 2.25M in past revenue.
 
-The full requirements are in the [Business Requirements Document](NEXT%20Gifting%20BRD.docx).
+**Some churned customers are hiding in plain sight.** About 640 customers who haven't ordered in 90 days sit inside Loyal and Needs Attention, so they never show up on an At Risk or Lost list. It is easy to miss them.
 
----
+**The UK is almost everything.** 5,351 of the 5,879 customers and 82.8% of revenue.
 
-## Tools
+**EIRE and the Netherlands stand out.** EIRE has only 4 customers but 616K in revenue, so those are a handful of very valuable accounts. The Netherlands has 22 customers, over half a million in revenue and a 72.7% churn rate.
 
-| Step | Tool |
-|---|---|
-| Data cleaning, RFM scoring, segmentation, churn flag | PostgreSQL |
-| Dashboard and analysis | Power BI |
-| Documentation | BRD, this README |
-
----
-
-## Dataset
-
-**Online Retail II** from the UCI Machine Learning Repository (donated by Daqing Chen). It contains 1,067,371 transaction rows from December 2009 to December 2011 (invoice, product, quantity, price, customer ID, country).
-
-After cleaning, the analysis table has **779,483 rows**.
-
----
-
-## How I cleaned the data (SQL)
-
-1. Combined the two yearly tables with `UNION ALL`.
-2. Counted and removed exact duplicate rows.
-3. Checked NULLs in every column and removed rows with no customer ID (I can't score a customer I can't identify).
-4. Removed rows with zero or negative quantity (returns and cancellations).
-5. Trimmed spaces and tidied product descriptions.
-6. Converted `invoicedate` from text to a proper timestamp.
-7. Removed test products.
-8. Reviewed zero-priced rows for data quality.
-9. Validated row counts after every step.
-
-The full SQL (cleaning, RFM scoring, segmentation and churn flag) is in [`WillowWren_Analytics.sql`](WillowWren_Analytics.sql).
-
----
-
-## RFM scoring and segments
-
-For every customer I calculated:
-
-- **Recency:** days since their last purchase, measured from the reference date 2011-12-10
-- **Frequency:** number of distinct invoices
-- **Monetary:** total revenue (`quantity × price`)
-
-**Scoring (1 to 5):**
-
-- Recency and Monetary use quintiles (`NTILE(5)`).
-- Frequency uses **fixed thresholds** (1, 2, 3 to 4, 5 to 9, 10+ orders). I switched to this after noticing that thousands of customers have exactly one order, and `NTILE` splits tied values into different buckets. Fixed thresholds mean everyone with the same number of orders gets the same score.
-
-**Segments:**
-
-| Segment | Rule |
-|---|---|
-| Champions | R ≥ 4, F ≥ 4, M ≥ 4 |
-| New | R ≥ 4, F = 1 |
-| At Risk | R ≤ 2, F ≥ 3 |
-| Lost | R ≤ 2, F ≤ 2 |
-| Loyal | R ≥ 3, F ≥ 3 |
-| Needs Attention | Everyone else |
-
-**Churn definition:** no purchase in the last **90 days**. I kept this as a fixed, easy-to-explain rule, as agreed in the BRD, rather than a statistically derived cutoff.
-
----
-
-## Results by segment
+### Results by segment
 
 | Segment | Customers | % of customers | Revenue | % of revenue | Churned |
 |---|---:|---:|---:|---:|---:|
@@ -105,7 +36,7 @@ For every customer I calculated:
 | New | 238 | 4.05% | 80,505 | 0.46% | 0% |
 | **Total** | **5,879** | | **17,374,578** | | **50.84%** |
 
-### By country (top markets)
+### Results by country
 
 | Country | Customers | Revenue | Churned |
 |---|---:|---:|---:|
@@ -117,103 +48,99 @@ For every customer I calculated:
 | Australia | 13 | 158,776 | 61.54% |
 | Spain | 41 | 120,362 | 43.90% |
 
-The Netherlands stands out: only 22 customers but a 72.7% churn rate and over half a million in revenue.
-
 ---
 
-## Recommended actions
+## What I would do about it
 
-**Champions (1,265)** are the most valuable group. Reward them: early access, loyalty perks, thank-you gifts, a dedicated contact for the biggest accounts. Losing even a few of them would hurt more than losing hundreds of Lost customers.
-
-**Loyal (1,338)** are steady and valuable. Keep them engaged and encourage upgrades toward Champion with bundles and repeat-order incentives. Pay attention to the roughly 416 who have already gone quiet.
-
-**At Risk (708)** used to buy often and have stopped. They are the best win-back opportunity. Send personalised win-back offers and discounts quickly, before they become Lost.
-
-**Lost (1,644)** are inactive and low value on average. Run a low-cost reactivation campaign (a discount or "we miss you" email) and stop spending heavily on them if it doesn't work.
-
-**Needs Attention (686)** buy recently but rarely, and about 32% have already churned. Use targeted offers and product suggestions to build a second and third purchase.
-
-**New (238)** have just joined. Send a welcome message and a small gift to encourage a second order, because that is where repeat customers are made.
-
-**Markets:** look more closely at EIRE (4 high-value accounts) and the Netherlands (high churn). Protect those accounts first, then test whether similar buyers exist in those markets.
+- **Champions:** look after them first. Early access to new products, loyalty perks, a thank-you gift, and a named contact for the biggest accounts. Losing a few of them costs more than losing hundreds of Lost customers.
+- **Loyal:** keep them buying with bundles and repeat-order offers, and nudge them toward Champion. Start with the roughly 416 who have already gone quiet.
+- **At Risk:** this is the best win-back group. They used to buy often. Send personal offers soon, before they drift into Lost.
+- **Lost:** try one low-cost "we miss you" campaign. If they don't respond, stop spending on them.
+- **Needs Attention:** they buy recently but not often, and about 32% have already gone quiet. Offer product suggestions that help them place a second and third order.
+- **New:** a welcome message and a small gift. The second order is where a one-time buyer becomes a regular.
+- **Markets:** protect the EIRE accounts, and find out why Dutch customers leave so often. Only after that would I test whether similar buyers exist in those markets.
 
 ---
 
 ## The dashboard
 
-**Home page:** navigation and a quick explanation of R, F and M.
+Three pages: a home page with navigation, a **Revenue & Customers Overview**, and a **Customer RFM & Country Analysis** page. Each report page has slicers for month, quarter, year, country, segment and churn status, plus a toggle (Revenue / Customers on the first, Segment / Country on the second).
 
-**Revenue & Customers Overview:** KPIs (total revenue, customers, quantity sold, UK revenue share, churn %), revenue and customers by segment, and trends by month, quarter and year. Toggle between the Revenue and Customers views.
-
-**Customer RFM & Country Analysis:** segment and country performance tables with average R, F and M scores, churn % and churn trends. Toggle between the Segment and Country views.
-
-Every page has slicers for month, quarter, year, country, segment and churn flag.
-
-| Revenue overview | Customers overview |
+| Revenue | Customers |
 |---|---|
-| ![Revenue](Dashboards%20Screenshots/Revenue%20Overview.png) | ![Customers](Dashboards%20Screenshots/Customers%20Overview.png) |
+| ![Revenue overview](Dashboards%20Screenshots/Revenue%20Overview.png) | ![Customers overview](Dashboards%20Screenshots/Customers%20Overview.png) |
 
-| Segment analysis | Country analysis |
+| Segments | Countries |
 |---|---|
-| ![Segments](Dashboards%20Screenshots/Customer%20RFM%20Segment%20Analysis.png) | ![Country](Dashboards%20Screenshots/Country%20Analysis.png) |
+| ![Segment analysis](Dashboards%20Screenshots/Customer%20RFM%20Segment%20Analysis.png) | ![Country analysis](Dashboards%20Screenshots/Country%20Analysis.png) |
 
 ---
 
-## Limitations (what you should know before relying on these numbers)
+## How it was built
 
-I'd rather be upfront about these than have you find them later.
+**Data.** Online Retail II from the UCI Machine Learning Repository (donated by Daqing Chen): 1,067,371 transaction lines from December 2009 to December 2011, with invoice, product, quantity, price, customer ID and country.
 
-- **Churn and segments are linked by design.** Both use recency, so At Risk and Lost are 100% churned and Champions are 0% churned automatically. The useful signal is the *size* and *revenue* of each group, plus the churned customers hiding inside Loyal and Needs Attention.
-- **Churn trends over time are biased.** The churn-by-month, quarter and year charts fall toward 2011 because recent customers haven't had time to churn yet. It doesn't mean retention improved.
-- **Wholesale and retail customers are not separated** because the data doesn't clearly distinguish them. A few large wholesale accounts (like the 4 in EIRE) can dominate revenue.
-- **Non-product lines** such as manual adjustments may still be included in revenue.
-- **Zero-price rows** were reviewed but kept in the analysis table.
-- **Historical data only.** No promotions, seasonality or forecasting. This is segmentation, not a predictive churn model.
-- The reference date is fixed at 2011-12-10, the last day in the data.
+**Cleaning (SQL).** I joined the two yearly tables, then removed exact duplicates, rows without a customer ID (I can't score a customer I can't identify), zero or negative quantities (returns and cancellations) and test products. I also trimmed the product descriptions and converted the invoice date from text to a timestamp. I checked row counts after each step. The analysis table ends up with 779,483 rows.
 
-## What I'd do next
+**RFM scoring.** For each customer:
 
-- Separate wholesale and retail customers
-- Add a revenue-at-risk metric by segment
-- Build a predictive churn model
-- Add customer lifetime value
-- Set up automatic monthly refreshes
+- **Recency:** days since their last order, counted from 10 December 2011 (the day after the last transaction in the data)
+- **Frequency:** number of distinct invoices
+- **Monetary:** total spend (`quantity x price`)
+
+Each is scored from 1 to 5. Recency and Monetary use quintiles (`NTILE(5)`). Frequency uses fixed bands: 1 order, 2 orders, 3 to 4, 5 to 9, and 10 or more.
+
+**Segments:**
+
+| Segment | Rule |
+|---|---|
+| Champions | R >= 4, F >= 4, M >= 4 |
+| New | R >= 4, F = 1 |
+| At Risk | R <= 2, F >= 3 |
+| Lost | R <= 2, F <= 2 |
+| Loyal | R >= 3, F >= 3 |
+| Needs Attention | everyone else |
+
+**Churn.** A customer is flagged as churned if their last order was more than 90 days before the reference date. It is a simple fixed rule, agreed in the [BRD](documentation/NEXT%20Gifting%20BRD.docx), not a statistically derived cut-off.
+
+**A change I made along the way.** My first version scored frequency with `NTILE` too. Thousands of customers have exactly one order, and `NTILE` splits identical values across different groups, so two customers with the same behaviour could get different scores. Switching frequency to fixed bands fixed that, and the numbers above come from the corrected version.
 
 ---
 
-## Repository structure
+## Things to keep in mind
+
+- **Churn and segments are linked.** Both depend on recency, so At Risk and Lost are 100% churned and Champions 0% by construction. The useful numbers are how big each group is, how much revenue it holds, and the churned customers inside Loyal and Needs Attention.
+- **The churn trend charts look better than reality.** Churn by month, quarter and year drops toward 2011 because recent customers haven't had time to go quiet yet. It doesn't mean retention improved.
+- **Wholesale and retail buyers aren't separated,** because the data doesn't tell them apart. A few large accounts, like the ones in EIRE, can dominate a country's numbers.
+- **Some non-product lines** (such as manual adjustments) may still be inside revenue, and zero-price rows were reviewed but kept.
+- **It is history only.** No promotions, seasonality or forecasting, and it is segmentation, not a predictive churn model.
+
+**If I kept going:** split wholesale from retail, add a revenue-at-risk view, add customer lifetime value, and try a predictive churn model.
+
+---
+
+## Repository
 
 ```
-├── WillowWren_Analytics.sql        # cleaning, RFM scoring, segmentation, churn flag
-├── 01_clean_data.csv               # cleaned transaction data
-├── 02_rfm_segmentation.csv         # customer-level RFM scores, segments, churn flag
-├── NEXT Retail Gifting.pbix        # Power BI dashboard
-├── NEXT Gifting BRD.docx           # Business Requirements Document
-├── NEXT Gifting Dataset.zip        # raw Online Retail II data
-├── Dashboards Screenshots/
-│   ├── Home Page.png
-│   ├── Revenue Overview.png
-│   ├── Customers Overview.png
-│   ├── Customer RFM Segment Analysis.png
-│   └── Country Analysis.png
+├── Dashboards Screenshots/     dashboard images used in this README
+├── NEXT Gifting Dataset/       raw data, plus the cleaned data and RFM output
+├── Power bi dashboard/         NEXT Retail Gifting.pbix
+├── SQL/                        SQL cleaning and analytics.sql
+├── documentation/              business requirements document and project PDF
 └── README.md
 ```
 
-## How to reproduce
+## Run it yourself
 
-1. Unzip `NEXT Gifting Dataset.zip` (the raw Online Retail II data from the UCI Machine Learning Repository).
-2. Create a PostgreSQL database and load the two yearly sheets into `next_1` and `next_2`.
-3. Run `WillowWren_Analytics.sql` from top to bottom.
-4. Open `NEXT Retail Gifting.pbix` in Power BI, point it at your PostgreSQL database, and refresh.
+1. Unzip `NEXT Gifting Dataset.zip` from the `NEXT Gifting Dataset` folder.
+2. Create a PostgreSQL database and load the two yearly files into `next_1` and `next_2`.
+3. Run [`SQL cleaning and analytics.sql`](SQL/SQL%20cleaning%20and%20analytics.sql) from top to bottom.
+4. Open the [`.pbix`](Power%20bi%20dashboard/NEXT%20Retail%20Gifting.pbix) in Power BI, point it at your database and refresh.
 
-Prefer to skip the SQL? `01_clean_data.csv` and `02_rfm_segmentation.csv` hold the cleaned data and the final customer segments.
+Want to skip the SQL? `Clean Data & RFM segmentation.zip` has the cleaned data and the final customer segments.
 
 ---
 
 ## About me
 
-I'm **Sami Ullah**, a data analyst working with SQL and Power BI. I build projects that go from raw data to decisions a business can act on.
-
-GitHub: [SamiUllah568](https://github.com/SamiUllah568)
-
-*If you'd like something similar for your own customer data, I'd be happy to talk.*
+I'm Sami Ullah, a data analyst working with SQL and Power BI. I like projects that start with a messy table and end with a decision someone can actually make. If you have customer data and would like something similar, get in touch through [GitHub](https://github.com/SamiUllah568).
