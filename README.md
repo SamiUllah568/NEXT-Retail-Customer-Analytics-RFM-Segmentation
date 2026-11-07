@@ -27,7 +27,7 @@ NEXT is a UK-based online-only retailer of gifts and home décor. A large share 
 
 The goal: identify the most valuable segments, quantify churn risk, and tell the marketing and CRM teams what to do with each group.
 
-The full requirements are in the [Business Requirements Document](docs/BRD_Customer_Analytics_RFM.pdf).
+The full requirements are in the [Business Requirements Document](NEXT%20Gifting%20BRD.docx).
 
 ---
 
@@ -61,7 +61,7 @@ After cleaning, the analysis table has **779,483 rows**.
 8. Reviewed zero-priced rows for data quality.
 9. Validated row counts after every step.
 
-All the SQL is in [`/sql`](sql/).
+The full SQL (cleaning, RFM scoring, segmentation and churn flag) is in [`WillowWren_Analytics.sql`](WillowWren_Analytics.sql).
 
 ---
 
@@ -184,13 +184,12 @@ I'd rather be upfront about these than have you find them later.
 ## Repository structure
 
 ```
-├── sql/
-│   ├── 01_data_cleaning.sql
-│   └── 02_rfm_segmentation.sql
-├── dashboard/
-│   └── NEXT_Retail_Gifting.pbix
-├── docs/
-│   └── BRD_Customer_Analytics_RFM.pdf
+├── WillowWren_Analytics.sql        # cleaning, RFM scoring, segmentation, churn flag
+├── 01_clean_data.csv               # cleaned transaction data
+├── 02_rfm_segmentation.csv         # customer-level RFM scores, segments, churn flag
+├── NEXT Retail Gifting.pbix        # Power BI dashboard
+├── NEXT Gifting BRD.docx           # Business Requirements Document
+├── NEXT Gifting Dataset.zip        # raw Online Retail II data
 ├── Dashboards Screenshots/
 │   ├── Home Page.png
 │   ├── Revenue Overview.png
@@ -202,10 +201,12 @@ I'd rather be upfront about these than have you find them later.
 
 ## How to reproduce
 
-1. Download Online Retail II from the UCI Machine Learning Repository.
+1. Unzip `NEXT Gifting Dataset.zip` (the raw Online Retail II data from the UCI Machine Learning Repository).
 2. Create a PostgreSQL database and load the two yearly sheets into `next_1` and `next_2`.
-3. Run the SQL scripts in order.
-4. Open the `.pbix` file in Power BI, point it at your PostgreSQL database, and refresh.
+3. Run `WillowWren_Analytics.sql` from top to bottom.
+4. Open `NEXT Retail Gifting.pbix` in Power BI, point it at your PostgreSQL database, and refresh.
+
+Prefer to skip the SQL? `01_clean_data.csv` and `02_rfm_segmentation.csv` hold the cleaned data and the final customer segments.
 
 ---
 
